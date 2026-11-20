@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { NotificationProvider } from '../context/NotificationContext';
 import Sidebar from './Sidebar';
-import BottomNav from './BottomNav';
 import TopBar from './TopBar';
 
 export default function Layout() {
@@ -38,13 +37,11 @@ export default function Layout() {
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar onOpenMenu={() => setIsMobileMenuOpen(true)} />
 
-          {/* pb-24 on mobile leaves room for the fixed bottom nav + safe area. */}
-          <main className="flex-1 pb-24 lg:pb-0">
+          {/* Removed the pb-24 (which was making room for the old bottom nav) and added pb-8 for general spacing */}
+          <main className="flex-1 pb-8">
             <Outlet />
           </main>
         </div>
-
-        <BottomNav />
       </div>
     </NotificationProvider>
   );
