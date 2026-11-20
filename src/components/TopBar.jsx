@@ -1,7 +1,7 @@
 // src/components/TopBar.jsx
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bell, CalendarCheck, ShieldCheck } from 'lucide-react';
+import { Bell, CalendarCheck, Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import NotificationPanel from './NotificationPanel';
@@ -13,14 +13,14 @@ const ROLE_LABEL = {
   STUDENT:    'Student',
 };
 
-export default function TopBar() {
+export default function TopBar({ onOpenMenu }) {
   const { user, role } = useAuth();
   const { unreadCount } = useNotifications();
   const { pathname } = useLocation();
   const [panelOpen, setPanelOpen] = useState(false);
   const panelRef = useRef(null);
 
-  // Close panel on route change — avoids the dropdown lingering across navigations.
+  // Close panel on route change
   useEffect(() => { setPanelOpen(false); }, [pathname]);
 
   // Click-outside + Escape dismissal.
@@ -44,9 +44,20 @@ export default function TopBar() {
 
         {/* Left: brand (mobile) / greeting (desktop) */}
         <div className="flex min-w-0 items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 text-white shadow-sm lg:hidden">
-            <CalendarCheck className="h-4.5 w-4.5" aria-hidden="true" />
-          </span>
+          {/* Mobile Menu Trigger */}
+          <button 
+            type="button"
+            onClick={onOpenMenu}
+            className="flex items-center gap-2.5 lg:hidden focus:outline-none"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 text-white shadow-sm">
+              <CalendarCheck className="h-4.5 w-4.5" aria-hidden="true" />
+            </span>
+            <p className="truncate text-sm font-bold tracking-tight text-slate-900">
+              NexEvent
+            </p>
+          </button>
+
           <div className="hidden min-w-0 lg:block">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0088cc]">
               {ROLE_LABEL[role] ?? 'Workspace'}
@@ -55,9 +66,6 @@ export default function TopBar() {
               {greeting()}, {user?.name?.split(' ')[0] ?? 'there'}
             </p>
           </div>
-          <p className="truncate text-sm font-bold tracking-tight text-slate-900 lg:hidden">
-            NexEvent
-          </p>
         </div>
 
         {/* Right: user chip (desktop) + bell */}

@@ -1,6 +1,6 @@
 // src/components/Sidebar.jsx
 import { NavLink } from 'react-router-dom';
-import { CalendarCheck, LogOut, ShieldCheck } from 'lucide-react';
+import { CalendarCheck, LogOut } from 'lucide-react';
 import { navForRole } from '../config/nav';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
@@ -12,15 +12,23 @@ const ROLE_LABEL = {
   STUDENT:    'Student',
 };
 
-export default function Sidebar() {
+export default function Sidebar({ isMobile = false, onNavigate }) {
   const { user, role, logout } = useAuth();
   const { unreadCount } = useNotifications();
   const items = navForRole(role);
 
+  // Base classes for both desktop and mobile
+  const baseClasses = "flex flex-col bg-white h-full";
+  // Desktop: hidden on mobile, fixed width, border right.
+  // Mobile: full width of the drawer container.
+  const responsiveClasses = isMobile 
+    ? "w-full" 
+    : "hidden lg:flex lg:w-64 lg:shrink-0 border-r border-slate-200";
+
   return (
-    <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:shrink-0 border-r border-slate-200 bg-white">
+    <aside className={`${baseClasses} ${responsiveClasses}`}>
       {/* Brand */}
-      <div className="flex items-center gap-2.5 px-6 py-5 border-b border-slate-100">
+      <div className="flex items-center gap-2.5 px-6 py-5 border-b border-slate-100 shrink-0">
         <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 text-white shadow-sm">
           <CalendarCheck className="h-4.5 w-4.5" aria-hidden="true" />
         </span>
@@ -33,14 +41,19 @@ export default function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
         {items.map((item) => (
-          <SidebarLink key={item.to} item={item} badge={item.showBadge ? unreadCount : 0} />
+          <SidebarLink 
+            key={item.to} 
+            item={item} 
+            badge={item.showBadge ? unreadCount : 0} 
+            onClick={onNavigate} 
+          />
         ))}
       </nav>
 
       {/* User footer */}
-      <div className="border-t border-slate-100 p-3">
+      <div className="border-t border-slate-100 p-3 shrink-0">
         <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2.5">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-xs font-bold text-white">
             {initials(user?.name)}
@@ -69,11 +82,12 @@ export default function Sidebar() {
   );
 }
 
-function SidebarLink({ item, badge }) {
+function SidebarLink({ item, badge, onClick }) {
   const Icon = item.icon;
   return (
     <NavLink
       to={item.to}
+      onClick={onClick}
       className={({ isActive }) =>
         [
           'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium',
